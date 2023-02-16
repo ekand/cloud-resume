@@ -29,6 +29,17 @@ export class CloudResumeBackendStack extends Stack {
       assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
     });
     table.grantReadWriteData(role);
+    role.addToPolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents",
+        ],
+        resources: ["arn:aws:logs:*:*:*"],
+      })
+    );
 
     // Create a new Lambda function
     const getVisitCountsHandler = new lambda.Function(
