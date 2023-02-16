@@ -98,6 +98,8 @@ export class CloudResumeBackendStack extends Stack {
     );
     const cf = new cloudfront.Distribution(this, "myDist", {
       defaultBehavior: { origin: new origins.S3Origin(assetsBucket) },
+      domainNames: ["erikresume.com"],
+      certificate,
     });
 
     const zone = route53.HostedZone.fromHostedZoneAttributes(
