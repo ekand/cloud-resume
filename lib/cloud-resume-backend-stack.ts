@@ -10,12 +10,25 @@ import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 
 import { Construct } from "constructs";
 
 export class CloudResumeBackendStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
+
+    // Create a new DynamoDB table
+    const table = new dynamodb.Table(this, "VisitsTable", {
+      partitionKey: { name: "id", type: dynamodb.AttributeType.STRING },
+      tableName: "visits-table",
+    });
+
+    // Create a new IAM role with DynamoDB read permissions
+    const role = new iam.Role(this, "MyLambdaRole", {
+      assumedBy: new iam.ServicePrincipal("lambda.amazonaws.com"),
+    });
+    table.grantReadWriteData(role);
 
     // Create a new Lambda function
     const getVisitCountsHandler = new lambda.Function(
@@ -25,6 +38,7 @@ export class CloudResumeBackendStack extends Stack {
         runtime: lambda.Runtime.PYTHON_3_9,
         code: lambda.Code.fromAsset("lambda"),
         handler: "get_visit_counts_handler.lambda_handler",
+        role: role,
       }
     );
 
@@ -35,6 +49,7 @@ export class CloudResumeBackendStack extends Stack {
         runtime: lambda.Runtime.PYTHON_3_9,
         code: lambda.Code.fromAsset("lambda"),
         handler: "post_visit_counts_handler.lambda_handler",
+        role: role,
       }
     );
 
@@ -55,23 +70,9 @@ export class CloudResumeBackendStack extends Stack {
     );
     visits.addMethod("POST", postintegration);
 
-    const oai = new cloudfront.OriginAccessIdentity(this, "MyOAI");
-
     const assetsBucket = new s3.Bucket(this, "CloudResumeBackendBucket", {
       websiteIndexDocument: "index.html",
     });
-
-    assetsBucket.addToResourcePolicy(
-      new iam.PolicyStatement({
-        actions: ["s3:GetObject"],
-        resources: [assetsBucket.arnForObjects("*")],
-        principals: [oai.grantPrincipal],
-        conditions: {
-          StringLike: { "aws:Referer": `https://*.cloudfront.net/*` },
-        },
-        effect: iam.Effect.ALLOW,
-      })
-    );
 
     new s3deploy.BucketDeployment(this, "DeployWebsite", {
       sources: [s3deploy.Source.asset("./website-dist")],
