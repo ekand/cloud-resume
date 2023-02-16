@@ -80,27 +80,6 @@ export class CloudResumeBackendStack extends Stack {
       postVisitCountsHandler
     );
     visits.addMethod("POST", postintegration);
-    visits.addMethod(
-      "OPTIONS",
-      new apigateway.MockIntegration({
-        integrationResponses: [
-          {
-            statusCode: "200",
-            responseParameters: {
-              "method.response.header.Access-Control-Allow-Headers":
-                "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
-              "method.response.header.Access-Control-Allow-Methods":
-                "GET,OPTIONS",
-              "method.response.header.Access-Control-Allow-Origin": "*",
-            },
-          },
-        ],
-        passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
-        requestTemplates: {
-          "application/json": '{"statusCode": 200}',
-        },
-      })
-    );
 
     const assetsBucket = new s3.Bucket(this, "CloudResumeBackendBucket", {
       websiteIndexDocument: "index.html",
@@ -119,8 +98,6 @@ export class CloudResumeBackendStack extends Stack {
     );
     const cf = new cloudfront.Distribution(this, "myDist", {
       defaultBehavior: { origin: new origins.S3Origin(assetsBucket) },
-      domainNames: ["www.erikresume.com", "erikresume.com"],
-      certificate,
     });
 
     const zone = route53.HostedZone.fromHostedZoneAttributes(
