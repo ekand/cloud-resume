@@ -4,7 +4,7 @@ import boto3
 
 def lambda_handler(event, context):
     dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table('visits')
+    table = dynamodb.Table('visits-table')
     response = table.get_item(
         Key={
             'record_id': 'website',
@@ -14,5 +14,5 @@ def lambda_handler(event, context):
     x = item['number_of_visits']
     return {
         'statusCode': 200,
-        'body': json.dumps(f'number of visits on website: {x}')
+        'body': json.dumps({"visits": x})
     }
