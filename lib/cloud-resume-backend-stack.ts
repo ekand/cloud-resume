@@ -1,7 +1,6 @@
-import { Duration, Stack, StackProps } from "aws-cdk-lib";
+import { Stack, StackProps } from "aws-cdk-lib";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
-import * as sns from "aws-cdk-lib/aws-sns";
 import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
@@ -11,6 +10,7 @@ import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as apigateway from "aws-cdk-lib/aws-apigateway";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as apigw from "aws-cdk-lib/aws-apigateway";
 
 import { Construct } from "constructs";
 
@@ -68,6 +68,9 @@ export class CloudResumeBackendStack extends Stack {
     const api = new apigateway.RestApi(this, "MyAPI", {
       restApiName: "My API",
       description: "An example API to demonstrate AWS CDK",
+      defaultCorsPreflightOptions: {
+        allowOrigins: apigw.Cors.ALL_ORIGINS,
+      },
     });
 
     // Create a new resource and method for the API Gateway
