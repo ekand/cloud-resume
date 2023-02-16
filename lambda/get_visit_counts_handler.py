@@ -14,5 +14,5 @@ def lambda_handler(event, context):
     x = item['number_of_visits']
     return {
         'statusCode': 200,
-        'body': json.dumps({"visits": x})
+        'body': json.dumps({"visits": str(x)})
     }
