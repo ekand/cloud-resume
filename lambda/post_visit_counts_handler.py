@@ -2,7 +2,16 @@ import json
 import boto3
 
 
+headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Methods": "OPTIONS,POST"
+}
+
+
 def lambda_handler(event, context):
+    if event["httpMethod"] == "OPTIONS":
+        return {"statusCode": 200, "headers": headers}
     dynamodb = boto3.resource('dynamodb')
     table = dynamodb.Table('visits-table')
     response = table.get_item(
