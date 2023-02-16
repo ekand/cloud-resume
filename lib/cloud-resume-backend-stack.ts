@@ -80,6 +80,26 @@ export class CloudResumeBackendStack extends Stack {
       postVisitCountsHandler
     );
     visits.addMethod("POST", postintegration);
+    visits.addMethod(
+      "OPTIONS",
+      new apigateway.MockIntegration({
+        integrationResponses: [
+          {
+            statusCode: "200",
+            responseParameters: {
+              "Access-Control-Allow-Headers":
+                "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+              "Access-Control-Allow-Methods": "'GET,OPTIONS'",
+              "Access-Control-Allow-Origin": "'*'",
+            },
+          },
+        ],
+        passthroughBehavior: apigateway.PassthroughBehavior.NEVER,
+        requestTemplates: {
+          "application/json": '{"statusCode": 200}',
+        },
+      })
+    );
 
     const assetsBucket = new s3.Bucket(this, "CloudResumeBackendBucket", {
       websiteIndexDocument: "index.html",
