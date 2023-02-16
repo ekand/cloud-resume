@@ -1,0 +1,90 @@
+/* Define the layout for the entire page */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #333;
+    color: #fff;
+}
+
+
+
+h1 {
+    margin: 20;
+}
+
+/* Define the layout for the main content section */
+main {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* Define the layout for the section headers */
+section h2 {
+    font-size: 1.5em;
+    margin-top: 0;
+}
+
+/* Define the layout for the list items */
+
+li {
+    margin-bottom: 20px;
+}
+
+li>ul>li {
+    margin-bottom: 10px;
+}
+
+a {
+    color: lightblue
+}
+
+a:visited {
+    color: lightpink;
+}
+
+/* Define the layout for the footer section */
+footer {
+    background-color: #333;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+}
+
+
+/* Center child elements */
+body,
+.website-counter {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+/* body {
+  height: 100vh;
+} */
+
+/* Styles for website counter container */
+.website-counter {
+  background-color: #ff4957;
+  height: 50px;
+  width: 80px;
+  color: white;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 25px;
+  margin-top: 10px;
+}
+
+/* Styles for reset button */
+#reset {
+  margin-top: 20px;
+  background-color: #008cba;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 8px 20px;
+  color: white;
+  border: 0;
+}
