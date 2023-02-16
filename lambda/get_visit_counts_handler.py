@@ -7,7 +7,7 @@ def lambda_handler(event, context):
     table = dynamodb.Table('visits-table')
     response = table.get_item(
         Key={
-            'record_id': 'website',
+            'id': 'website',
         }
     )
     item = response['Item']
