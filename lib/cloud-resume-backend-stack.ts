@@ -8,12 +8,52 @@ import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as route53 from "aws-cdk-lib/aws-route53";
 import * as targets from "aws-cdk-lib/aws-route53-targets";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as apigateway from "aws-cdk-lib/aws-apigateway";
 
 import { Construct } from "constructs";
 
 export class CloudResumeBackendStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
+
+    // Create a new Lambda function
+    const getVisitCountsHandler = new lambda.Function(
+      this,
+      "GetVisitCountsHandler",
+      {
+        runtime: lambda.Runtime.PYTHON_3_9,
+        code: lambda.Code.fromAsset("lambda"),
+        handler: "get_visit_counts_handler.lambda_handler",
+      }
+    );
+
+    const postVisitCountsHandler = new lambda.Function(
+      this,
+      "PostVisitCountsHandler",
+      {
+        runtime: lambda.Runtime.PYTHON_3_9,
+        code: lambda.Code.fromAsset("lambda"),
+        handler: "post_visit_counts_handler.lambda_handler",
+      }
+    );
+
+    // Create a new API Gateway REST API
+    const api = new apigateway.RestApi(this, "MyAPI", {
+      restApiName: "My API",
+      description: "An example API to demonstrate AWS CDK",
+    });
+
+    // Create a new resource and method for the API Gateway
+    const visits = api.root.addResource("visits");
+    const getintegration = new apigateway.LambdaIntegration(
+      getVisitCountsHandler
+    );
+    visits.addMethod("GET", getintegration);
+    const postintegration = new apigateway.LambdaIntegration(
+      postVisitCountsHandler
+    );
+    visits.addMethod("POST", postintegration);
 
     const oai = new cloudfront.OriginAccessIdentity(this, "MyOAI");
 
@@ -44,29 +84,9 @@ export class CloudResumeBackendStack extends Stack {
       // found using aws acm list-certificates --region us-east-1
       "arn:aws:acm:us-east-1:212702451742:certificate/abf2dd8b-3651-4fe1-9452-56ade04917e1"
     );
-    const cf = new cloudfront.CloudFrontWebDistribution(
-      this,
-      "MyDistribution",
-      {
-        originConfigs: [
-          {
-            s3OriginSource: {
-              s3BucketSource: assetsBucket,
-              originAccessIdentity: oai,
-            },
-            behaviors: [
-              {
-                isDefaultBehavior: true,
-                allowedMethods:
-                  cloudfront.CloudFrontAllowedMethods.GET_HEAD_OPTIONS,
-                cachedMethods:
-                  cloudfront.CloudFrontAllowedCachedMethods.GET_HEAD,
-              },
-            ],
-          },
-        ],
-      }
-    );
+    const cf = new cloudfront.Distribution(this, "myDist", {
+      defaultBehavior: { origin: new origins.S3Origin(assetsBucket) },
+    });
 
     const zone = route53.HostedZone.fromHostedZoneAttributes(
       this,
