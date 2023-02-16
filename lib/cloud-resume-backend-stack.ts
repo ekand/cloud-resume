@@ -87,10 +87,11 @@ export class CloudResumeBackendStack extends Stack {
           {
             statusCode: "200",
             responseParameters: {
-              "Access-Control-Allow-Headers":
-                "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-              "Access-Control-Allow-Methods": "'GET,OPTIONS'",
-              "Access-Control-Allow-Origin": "'*'",
+              "method.response.header.Access-Control-Allow-Headers":
+                "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token",
+              "method.response.header.Access-Control-Allow-Methods":
+                "GET,OPTIONS",
+              "method.response.header.Access-Control-Allow-Origin": "*",
             },
           },
         ],
@@ -118,6 +119,7 @@ export class CloudResumeBackendStack extends Stack {
     );
     const cf = new cloudfront.Distribution(this, "myDist", {
       defaultBehavior: { origin: new origins.S3Origin(assetsBucket) },
+      certificate,
     });
 
     const zone = route53.HostedZone.fromHostedZoneAttributes(
